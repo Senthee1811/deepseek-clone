@@ -41,11 +41,11 @@ const Sidebar = ({ expand, setExpand }) => {
         <Image className={expand ? "w-5" : "w-6.5 mx-auto"} src={expand ? assets.phone_icon : assets.phone_icon_dull} alt="Phone" />
 
         {/* QR Code Tooltip */}
-        <div className={`absolute ${expand ? "top-12 left-1/2 -translate-x-1/2" : "top-1/2 right-12 -translate-y-1/2"} opacity-0 group-hover:opacity-100 transition-all duration-300 z-50`}>
+        <div className={`absolute -top-60 pb-8  ${!expand && "-right-40"} opacity-0 group-hover:opacity-100 hidden group-hover:block transition `}>
           <div className='relative w-max bg-black text-sm text-white rounded-lg p-3 shadow-lg'>
             <Image src={assets.qrcode} alt="QR Code" className='w-44' />
             <p className="mt-2 text-center">Scan to get DeepSeek App</p>
-            <div className={`w-3 h-3 absolute bg-black rotate-45 ${expand ? "left-1/2 -top-1.5 -translate-x-1/2" : "right-2 -top-1.5"}`} />
+            <div className={`w-3 h-3 absolute bg-black rotate-45 ${expand ? "right-1/2" : "left-4"}`} />
           </div>
         </div>
 
