@@ -23,6 +23,7 @@ export async function POST(req) {
     ({ data, type } = wh.verify(body, svixHeaders));
   } catch (err) {
     return new NextResponse("Webhook verification failed", { status: 400 });
+    console.log(err)
   }
 
   const userData = {
