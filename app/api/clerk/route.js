@@ -1,58 +1,45 @@
 import { Webhook } from "svix";
 import connectDB from "@/config/db";
-import User from "@/models/User";
+import User from "@/models/User"; 
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-export async function POST(req) {
-  const wh = new Webhook(process.env.SIGNING_SECRET);
-
-  const headerPayload = headers(); // ❗ Don't `await` this — it's synchronous
-  const svixHeaders = {
-    "svix-id": headerPayload.get("svix-id"),
-    "svix-signature": headerPayload.get("svix-signature"),
-    "svix-timestamp": headerPayload.get("svix-timestamp"),
-  };
-
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
-
-  let data, type;
-
-  try {
-    ({ data, type } = wh.verify(body, svixHeaders));
-  } catch (err) {
-    return new NextResponse("Webhook verification failed", { status: 400 });
-    console.log(err)
-  }
-
-  const userData = {
-    _id: data.id,
-    email: data.email_addresses?.[0]?.email_address || "",
-    name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-    image: data.image_url,
-  };
-
-  await connectDB();
-
-  try {
-    switch (type) {
-      case "user.created":
-        await User.create(userData);
-        break;
-      case "user.updated":
-        await User.findByIdAndUpdate(data.id, userData);
-        break;
-      case "user.deleted":
-        await User.findByIdAndDelete(data.id);
-        break;
-      default:
-        break;
+export async function POST(req){
+    const wh = new Webhook(process.env.SIGNING_SECRET) 
+    const headerPayload = await headers() 
+    const svixHeaders = {
+        "svix-id":headerPayload.get("svix-id"),
+        "svix-signature":headerPayload.get("svix-signature"),
+        "svix-timestamp":headerPayload.get("svix-timestamp")
     }
 
-    return NextResponse.json({ message: "Message Received" });
-  } catch (err) {
-    console.error("Database error:", err);
-    return new NextResponse("Server Error", { status: 500 });
-  }
+    const payload = await req.json(); 
+    const body = JSON.stringify(payload); 
+    const {data,type} = wh.verify(body,svixHeaders); 
+
+    const userData = {
+        _id: data.id,
+        email: data.email_addresses[0].email_address,
+        name: `${data.first_name} ${data.last_name}`,
+        image: data.image_url
+    }; 
+
+    await connectDB(); 
+
+    switch(type) {
+        case 'user.created':
+             await User.create(userData);
+             break; 
+        case 'user.updated':
+            await User.findByIdAndUpdate(data.id,userData);
+            break;
+        case 'user.deleted':
+            await User.findByIdAndDelete(data.id);
+            break; 
+        default:
+            break;
+    }
+    return NextRequest.json({
+        message:"Message Received"
+    })
 }
